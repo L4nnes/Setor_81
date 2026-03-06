@@ -1,41 +1,85 @@
-# Setor 81
+# Setor 81 — V0.1
 
-Este projeto usa [Vite](https://vitejs.dev/) com TypeScript para criar um pequeno jogo 2D. O repositório ainda está em estágio inicial.
+Protótipo jogável de um RTS minimalista no navegador, com **simulação determinística por ticks**.
 
-## Instalação das dependências
+## Visão do projeto
 
-Execute o comando abaixo para baixar as dependências listadas em `package.json`:
+Setor 81 foi construído para ser pequeno no front-end (singleplayer local), mas com base arquitetural correta para evoluir para replay, sincronização e multiplayer no futuro.
+
+A versão atual já inclui:
+- mapa fixo com territórios conectados;
+- produção automática de unidades;
+- envio de forças agregadas entre territórios;
+- combate simples na chegada;
+- captura de territórios;
+- bot inimigo básico;
+- condição de vitória/derrota.
+
+## Como rodar
 
 ```bash
 npm install
-```
-
-## Ambiente de desenvolvimento
-
-Para iniciar o servidor de desenvolvimento do Vite utilize:
-
-```bash
 npm run dev
 ```
 
-Isso abrirá o projeto em `localhost` e recarregará a página sempre que um arquivo for alterado.
-
-## Geração de build
-
-Após finalizar as alterações, o build para produção pode ser gerado com:
+Para build de produção:
 
 ```bash
 npm run build
 ```
 
-## Descrição do jogo
+Para testes unitários:
 
-*Setor 81* é um protótipo de jogo de tiro em perspectiva superior. O objetivo é explorar o mapa eliminando inimigos e coletando itens.
+```bash
+npm run test
+```
 
-### Controles
+## Arquitetura
 
-- **W**, **A**, **S**, **D** ou setas direcionais: movimentação do personagem;
-- **Botão esquerdo do mouse**: disparo da arma principal;
-- **Espaço**: interação/acao especial (quando implementada).
+```text
+/src
+  /core
+    types.ts
+    constants.ts
+    command.ts
+    territory.ts
+    force.ts
+    map.ts
+    gameState.ts
+    combat.ts
+    production.ts
+    movement.ts
+    capture.ts
+    simulation.ts
+    tick.ts
+  /ai
+    bot.ts
+  /render
+    canvasRenderer.ts
+    camera.ts
+    hud.ts
+  /input
+    mouseController.ts
+  /utils
+    math.ts
+    helpers.ts
+  main.ts
+```
 
-Sinta-se à vontade para clonar o repositório e contribuir com o desenvolvimento!
+## Por que simulação por ticks?
+
+A simulação usa **20 ticks por segundo** e separa completamente regra de jogo de renderização.
+
+Pipeline de cada tick:
+1. processa comandos em fila;
+2. atualiza produção;
+3. atualiza movimentação/chegadas;
+4. resolve combate/captura;
+5. executa IA do bot;
+6. recalcula vitória/derrota.
+
+Isso garante previsibilidade e facilita no futuro:
+- aplicar comandos por tick com latência;
+- reproduzir partida por sequência de comandos;
+- sincronizar estado entre cliente/servidor;
+- manter gameplay independente do FPS.
