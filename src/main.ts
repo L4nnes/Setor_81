@@ -1,82 +1,60 @@
-import './style.css'
+import './style.css';
+import { runBotTick } from './ai/bot';
+import { createInitialGameState } from './core/gameState';
+import { runSimulationTick } from './core/simulation';
+import { createTickAccumulator } from './core/tick';
+import { MouseController } from './input/mouseController';
+import { CanvasRenderer } from './render/canvasRenderer';
+import { createCamera } from './render/camera';
 
-type MapGrid = number[][]
-
-const app = document.querySelector<HTMLDivElement>('#app')!
-app.innerHTML = ''
-
-const canvas = document.createElement('canvas')
-canvas.width = 400
-canvas.height = 400
-app.appendChild(canvas)
-
-const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-
-let viewport = { x: 0, y: 0 }
-let map: MapGrid = []
-let keyHandler: ((e: KeyboardEvent) => void) | undefined
-
-function generateMap(): void {
-  map = []
-  const rows = 20
-  const cols = 20
-  for (let y = 0; y < rows; y++) {
-    const row: number[] = []
-    for (let x = 0; x < cols; x++) {
-      row.push(Math.random() > 0.5 ? 1 : 0)
-    }
-    map.push(row)
-  }
+const app = document.querySelector<HTMLDivElement>('#app');
+if (!app) {
+  throw new Error('App root not found');
 }
 
-function drawMap(): void {
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
-  const tile = 20
-  for (let y = 0; y < map.length; y++) {
-    for (let x = 0; x < map[y].length; x++) {
-      ctx.fillStyle = map[y][x] ? '#646cff' : '#1a1a1a'
-      ctx.fillRect(x * tile + viewport.x, y * tile + viewport.y, tile - 1, tile - 1)
-    }
-  }
+app.innerHTML = `
+  <div class="layout">
+    <h1>Setor 81 — V0.1</h1>
+    <p>Clique em um território azul e depois em um território conectado para enviar 50% das tropas.</p>
+    <canvas id="game" width="920" height="560"></canvas>
+  </div>
+`;
+
+const canvas = document.querySelector<HTMLCanvasElement>('#game');
+if (!canvas) {
+  throw new Error('Canvas not found');
 }
 
-function init(): void {
-  if (keyHandler) {
-    window.removeEventListener('keydown', keyHandler)
-  }
-
-  viewport = { x: 0, y: 0 }
-  generateMap()
-  drawMap()
-
-  keyHandler = (ev: KeyboardEvent): void => {
-    const step = 20
-    switch (ev.key) {
-      case 'ArrowUp':
-        viewport.y += step
-        drawMap()
-        break
-      case 'ArrowDown':
-        viewport.y -= step
-        drawMap()
-        break
-      case 'ArrowLeft':
-        viewport.x += step
-        drawMap()
-        break
-      case 'ArrowRight':
-        viewport.x -= step
-        drawMap()
-        break
-      case 'r':
-      case 'R':
-        init()
-        break
-    }
-  }
-
-  window.addEventListener('keydown', keyHandler)
+const ctx = canvas.getContext('2d');
+if (!ctx) {
+  throw new Error('2D context not available');
 }
 
-init()
+const camera = createCamera(canvas.width, canvas.height);
+void camera;
 
+const state = createInitialGameState();
+const renderer = new CanvasRenderer(ctx);
+const mouseController = new MouseController(canvas, () => state);
+const accumulator = createTickAccumulator();
+
+let lastTimestamp = performance.now();
+
+function frame(now: number): void {
+  const deltaMs = now - lastTimestamp;
+  lastTimestamp = now;
+
+  const steps = accumulator.pushFrameDelta(deltaMs);
+  for (let i = 0; i < steps; i += 1) {
+    runSimulationTick(state, runBotTick);
+  }
+
+  renderer.render(state);
+  requestAnimationFrame(frame);
+}
+
+requestAnimationFrame(frame);
+
+window.addEventListener('beforeunload', () => {
+  mouseController.destroy();
+});
