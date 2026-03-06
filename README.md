@@ -1,41 +1,33 @@
-# Setor 81
+# Setor 81 — V0.1
 
-Este projeto usa [Vite](https://vitejs.dev/) com TypeScript para criar um pequeno jogo 2D. O repositório ainda está em estágio inicial.
+Protótipo jogável de estratégia em tempo real com Canvas 2D e TypeScript.
 
-## Instalação das dependências
+## O que já existe na V0.1
 
-Execute o comando abaixo para baixar as dependências listadas em `package.json`:
+- mapa fixo com 30 territórios conectados;
+- geração automática de unidades;
+- envio de 50% das tropas entre territórios vizinhos;
+- combate simples e captura de território;
+- bot inimigo com decisão básica por vantagem numérica;
+- condição de vitória e derrota.
+
+## Como rodar
 
 ```bash
 npm install
-```
-
-## Ambiente de desenvolvimento
-
-Para iniciar o servidor de desenvolvimento do Vite utilize:
-
-```bash
 npm run dev
 ```
 
-Isso abrirá o projeto em `localhost` e recarregará a página sempre que um arquivo for alterado.
+Abra o endereço exibido no terminal (normalmente `http://localhost:5173`).
 
-## Geração de build
-
-Após finalizar as alterações, o build para produção pode ser gerado com:
+## Build
 
 ```bash
 npm run build
 ```
 
-## Descrição do jogo
+## Controles
 
-*Setor 81* é um protótipo de jogo de tiro em perspectiva superior. O objetivo é explorar o mapa eliminando inimigos e coletando itens.
-
-### Controles
-
-- **W**, **A**, **S**, **D** ou setas direcionais: movimentação do personagem;
-- **Botão esquerdo do mouse**: disparo da arma principal;
-- **Espaço**: interação/acao especial (quando implementada).
-
-Sinta-se à vontade para clonar o repositório e contribuir com o desenvolvimento!
+- Clique em um território azul para selecionar.
+- Clique em um território vizinho para enviar tropas.
+- O objetivo é conquistar todos os territórios vermelhos.
